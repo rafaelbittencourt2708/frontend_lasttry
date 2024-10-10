@@ -33,8 +33,42 @@ import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SettingsMenu } from "@/components/settings-menu"
 import { ModeToggle } from "@/components/mode-toggle"
+import { EmptyState } from "@/components/empty-state"
 
-export function Dashboard({ children }: { children: React.ReactNode }) {
+const AccountSettings = () => (
+  <EmptyState
+    title="Account Settings"
+    description="Manage your account settings here"
+    actionLabel="Update Account"
+    onAction={() => console.log("Update account clicked")}
+  />
+)
+
+const BillingSettings = () => (
+  <EmptyState
+    title="Billing Settings"
+    description="Manage your billing information and subscriptions"
+    actionLabel="Update Billing"
+    onAction={() => console.log("Update billing clicked")}
+  />
+)
+
+const NotificationsSettings = () => (
+  <EmptyState
+    title="Notification Settings"
+    description="Customize your notification preferences"
+    actionLabel="Update Notifications"
+    onAction={() => console.log("Update notifications clicked")}
+  />
+)
+
+import DashboardContent from "@/app/dashboard/page"
+import InboxPage from "@/app/inbox/page"
+import AgentBuilderPage from "@/app/agent-builder/page"
+import CustomersPage from "@/app/customers/page"
+import ViewsPage from "@/app/views/page"
+
+export function Dashboard() {
   const [showSettings, setShowSettings] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -48,6 +82,48 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
     setShowSettings(pathname.startsWith('/settings'))
   }, [pathname])
 
+  const renderContent = () => {
+    switch (pathname) {
+      case "/":
+      case "/dashboard":
+        return <DashboardContent />
+      case "/inbox":
+        return <EmptyState
+          title="Inbox"
+          description="Your messages will appear here"
+          actionLabel="New Message"
+          onAction={() => console.log("New message clicked")}
+        />
+      case "/agent-builder":
+        return <AgentBuilderPage />
+      case "/customers":
+        return <EmptyState
+          title="Customers"
+          description="Manage your customer relationships"
+          actionLabel="Add Customer"
+          onAction={() => console.log("Add customer clicked")}
+        />
+      case "/views":
+        return <EmptyState
+          title="Views"
+          description="Customize your data views"
+          actionLabel="Create View"
+          onAction={() => console.log("Create view clicked")}
+        />
+      case "/settings/account":
+        return <AccountSettings />
+      case "/settings/billing":
+        return <BillingSettings />
+      case "/settings/notifications":
+        return <NotificationsSettings />
+      default:
+        if (pathname.startsWith("/settings")) {
+          return <AccountSettings /> // Default to account settings if no specific setting page matches
+        }
+        return <DashboardContent /> // Default to dashboard if no match
+    }
+  }
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -56,7 +132,6 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
             <div className={`absolute inset-0 transition-transform duration-300 ease-in-out ${showSettings ? '-translate-x-full' : 'translate-x-0'}`}>
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
-                  <Bot className="h-6 w-6" />
                   <span className="">Health Bot</span>
                 </Link>
               </div>
@@ -87,17 +162,6 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
                       6
                     </Badge>
                   </Link>
-                  <Link
-                    href="/conversation-builder"
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
-                      pathname === "/conversation-builder"
-                        ? "bg-muted text-primary"
-                        : "text-muted-foreground hover:text-primary"
-                    } transition-all`}
-                  >
-                    <MessageSquarePlus className="h-4 w-4" />
-                    Conversation Builder
-                  </Link>
                   <div className="mt-4 mb-2 px-3 text-xs font-semibold text-muted-foreground">
                     Customer Relationship
                   </div>
@@ -122,6 +186,20 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
                   >
                     <Layers className="h-4 w-4" />
                     Views
+                  </Link>
+                  <div className="mt-4 mb-2 px-3 text-xs font-semibold text-muted-foreground">
+                    Automation
+                  </div>
+                  <Link
+                    href="/agent-builder"
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
+                      pathname === "/agent-builder"
+                        ? "bg-muted text-primary"
+                        : "text-muted-foreground hover:text-primary"
+                    } transition-all`}
+                  >
+                    <Bot className="h-4 w-4" />
+                    Agent Builder
                   </Link>
                 </nav>
                 <div className="px-2 lg:px-4 pb-4">
@@ -170,7 +248,6 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
                   href="#"
                   className="flex items-center gap-2 text-lg font-semibold"
                 >
-                  <Bot className="h-6 w-6" />
                   <span className="">Health Bot</span>
                 </Link>
                 <Link
@@ -190,13 +267,9 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
                     6
                   </Badge>
                 </Link>
-                <Link
-                  href="/conversation-builder"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
-                  <MessageSquarePlus className="h-5 w-5" />
-                  Conversation Builder
-                </Link>
+                <div className="mt-4 mb-2 text-xs font-semibold text-muted-foreground">
+                  Customer Relationship
+                </div>
                 <Link
                   href="/customers"
                   className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
@@ -210,6 +283,16 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
                 >
                   <Layers className="h-5 w-5" />
                   Views
+                </Link>
+                <div className="mt-4 mb-2 text-xs font-semibold text-muted-foreground">
+                  Automation
+                </div>
+                <Link
+                  href="/agent-builder"
+                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                >
+                  <Bot className="h-5 w-5" />
+                  Agent Builder
                 </Link>
               </nav>
             </SheetContent>
@@ -245,7 +328,7 @@ export function Dashboard({ children }: { children: React.ReactNode }) {
           </DropdownMenu>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-          {children}
+          {renderContent()}
         </main>
       </div>
     </div>
